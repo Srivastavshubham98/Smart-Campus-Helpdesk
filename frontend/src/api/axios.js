@@ -1,6 +1,7 @@
 import axios from "axios";
 
-const API_BASE_URL = "https://smart-campus-helpdesk-backend.onrender.com";
+const API_BASE_URL =
+  "https://smart-campus-helpdesk-backend.onrender.com/api";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -9,8 +10,6 @@ const api = axios.create({
   },
 });
 
-// Refresh request ke liye separate Axios instance.
-// Is par interceptors nahi lagenge, isliye infinite loop nahi hoga.
 const refreshApi = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -45,7 +44,7 @@ const redirectToLogin = () => {
   }
 };
 
-// Har API request ke saath access token bhejna.
+// Har protected API request ke saath access token bhejega.
 api.interceptors.request.use(
   (config) => {
     const accessToken = localStorage.getItem("access");
@@ -60,7 +59,7 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Access token expire hone par automatically refresh karna.
+// Access token expire hone par automatically refresh karega.
 api.interceptors.response.use(
   (response) => response,
 
@@ -72,19 +71,19 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // Sirf 401 Unauthorized par refresh attempt karna.
+    // Sirf 401 Unauthorized par token refresh try karna.
     if (statusCode !== 401) {
       return Promise.reject(error);
     }
 
     const requestUrl = originalRequest.url || "";
 
-    // Login ya refresh request fail ho to dobara refresh try nahi karna.
-    const isAuthRequest =
+    // Login aur refresh endpoint ko dobara refresh loop me mat bhejna.
+    const isAuthenticationRequest =
       requestUrl.includes("/accounts/login/") ||
       requestUrl.includes("/accounts/refresh/");
 
-    if (isAuthRequest || originalRequest._retry) {
+    if (isAuthenticationRequest || originalRequest._retry) {
       return Promise.reject(error);
     }
 
@@ -98,8 +97,8 @@ api.interceptors.response.use(
 
     originalRequest._retry = true;
 
-    // Agar refresh request already chal rahi hai,
-    // to doosri failed requests queue me wait karengi.
+    // Agar ek refresh already chal raha hai,
+    // to baaki failed requests wait karengi.
     if (isRefreshing) {
       try {
         const newAccessToken = await new Promise((resolve, reject) => {
@@ -140,8 +139,8 @@ api.interceptors.response.use(
 
       localStorage.setItem("access", newAccessToken);
 
-      // Backend refresh-token rotation use karta ho to
-      // naya refresh token bhi save ho jayega.
+      // Refresh-token rotation enabled hone par
+      // backend naya refresh token bhi bhej sakta hai.
       if (newRefreshToken) {
         localStorage.setItem("refresh", newRefreshToken);
       }
