@@ -20,7 +20,7 @@ function Tickets() {
     const [totalTickets, setTotalTickets] = useState(0);
     const [nextPage, setNextPage] = useState(null);
     const [previousPage, setPreviousPage] = useState(null);
-    
+
 
     const fetchTickets = async () => {
         try {
@@ -49,40 +49,40 @@ function Tickets() {
     };
 
     const fetchDepartments = async () => {
-    try {
-        setDepartmentsLoading(true);
+        try {
+            setDepartmentsLoading(true);
 
-        let allDepartments = [];
-        let nextUrl = "/helpdesk/departments/";
+            let allDepartments = [];
+            let nextUrl = "/helpdesk/departments/";
 
-        while (nextUrl) {
-            const response = await api.get(nextUrl);
+            while (nextUrl) {
+                const response = await api.get(nextUrl);
 
-            const pageDepartments =
-                response.data.results || response.data;
+                const pageDepartments =
+                    response.data.results || response.data;
 
-            allDepartments = [
-                ...allDepartments,
-                ...pageDepartments,
-            ];
+                allDepartments = [
+                    ...allDepartments,
+                    ...pageDepartments,
+                ];
 
-            if (response.data.next) {
-                nextUrl = response.data.next.replace(
-                    "https://smart-campus-helpdesk-backend.onrender.com/api",
-                    ""
-                );
-            } else {
-                nextUrl = null;
+                if (response.data.next) {
+                    nextUrl = response.data.next.replace(
+                        "https://smart-campus-helpdesk-backend.onrender.com/api",
+                        ""
+                    );
+                } else {
+                    nextUrl = null;
+                }
             }
-        }
 
-        setDepartments(allDepartments);
-    } catch (error) {
-        console.error("Departments fetch error:", error);
-    } finally {
-        setDepartmentsLoading(false);
-    }
-};
+            setDepartments(allDepartments);
+        } catch (error) {
+            console.error("Departments fetch error:", error);
+        } finally {
+            setDepartmentsLoading(false);
+        }
+    };
     useEffect(() => {
         fetchDepartments();
     }, []);
@@ -130,8 +130,8 @@ function Tickets() {
         }
     };
     if (loading) {
-    return <Loader message="Loading tickets..." />;
-}
+        return <Loader message="Loading tickets..." />;
+    }
 
     return (
         <div className="space-y-6">
@@ -201,28 +201,28 @@ function Tickets() {
                         <option value="LOW">Low</option>
                     </select>
                     <select
-    value={department}
-    onChange={(event) => {
-        setDepartment(event.target.value);
-        setCurrentPage(1);
-    }}
-    disabled={departmentsLoading}
-    className="rounded-xl border border-slate-200 px-4 py-3 outline-none transition focus:border-blue-500 disabled:cursor-not-allowed disabled:bg-slate-100"
->
-    {departmentsLoading ? (
-        <option value="">Loading departments...</option>
-    ) : (
-        <>
-            <option value="">All Departments</option>
+                        value={department}
+                        onChange={(event) => {
+                            setDepartment(event.target.value);
+                            setCurrentPage(1);
+                        }}
+                        disabled={departmentsLoading}
+                        className="rounded-xl border border-slate-200 px-4 py-3 outline-none transition focus:border-blue-500 disabled:cursor-not-allowed disabled:bg-slate-100"
+                    >
+                        {departmentsLoading ? (
+                            <option value="">Loading departments...</option>
+                        ) : (
+                            <>
+                                <option value="">All Departments</option>
 
-            {departments.map((item) => (
-                <option key={item.id} value={item.id}>
-                    {item.name}
-                </option>
-            ))}
-        </>
-    )}
-</select>
+                                {departments.map((item) => (
+                                    <option key={item.id} value={item.id}>
+                                        {item.name}
+                                    </option>
+                                ))}
+                            </>
+                        )}
+                    </select>
                     <button
                         type="button"
                         onClick={() => {
@@ -245,119 +245,207 @@ function Tickets() {
                     : `${totalTickets} ticket${totalTickets === 1 ? "" : "s"} found`}
             </p>
 
-            <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
-               {tickets.length === 0 ? (
-                    <div className="p-10 text-center text-slate-500">
-                        No tickets found
-                    </div>
-                ) : (
-                    <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead className="bg-slate-50">
-                                <tr className="text-left text-sm text-slate-500">
-                                    <th className="px-6 py-4">ID</th>
-                                    <th className="px-6 py-4">Title</th>
-                                    <th className="px-6 py-4">Department</th>
-                                    <th className="px-6 py-4">Priority</th>
-                                    <th className="px-6 py-4">Status</th>
-                                    <th className="px-6 py-4">Assigned To</th>
-                                    <th className="px-6 py-4">Action</th>
-                                </tr>
-                            </thead>
+            {tickets.length === 0 ? (
+                <div className="rounded-2xl bg-white p-10 text-center text-slate-500 shadow-sm">
+                    No tickets found
+                </div>
+            ) : (
+                <>
+                    {/* Mobile cards */}
+                    <div className="space-y-4 md:hidden">
+                        {tickets.map((ticket) => (
+                            <article
+                                key={ticket.id}
+                                className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+                            >
+                                <div className="flex items-start justify-between gap-3">
+                                    <div className="min-w-0">
+                                        <p className="text-xs font-semibold text-blue-600">
+                                            Ticket #{ticket.id}
+                                        </p>
 
-                            <tbody className="divide-y divide-slate-100">
-                                {tickets.map((ticket) => (
-                                    <tr
-                                        key={ticket.id}
-                                        className="text-sm transition hover:bg-slate-50"
+                                        <h2 className="mt-1 break-words text-base font-bold text-slate-800">
+                                            {ticket.title}
+                                        </h2>
+                                    </div>
+
+                                    <span
+                                        className={`flex-shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ${getStatusStyle(
+                                            ticket.status
+                                        )}`}
                                     >
-                                        <td className="px-6 py-4 font-medium text-slate-700">
-                                            #{ticket.id}
-                                        </td>
+                                        {ticket.status?.replaceAll("_", " ")}
+                                    </span>
+                                </div>
 
-                                        <td className="px-6 py-4">
-                                            <p className="font-semibold text-slate-800">
-                                                {ticket.title}
-                                            </p>
+                                <p className="mt-3 line-clamp-2 text-sm leading-6 text-slate-500">
+                                    {ticket.description}
+                                </p>
 
-                                            <p className="mt-1 max-w-xs truncate text-xs text-slate-500">
-                                                {ticket.description}
-                                            </p>
-                                        </td>
+                                <div className="mt-4 grid gap-3 rounded-xl bg-slate-50 p-3 min-[420px]:grid-cols-2">
+                                    <div>
+                                        <p className="text-xs text-slate-400">
+                                            Department
+                                        </p>
 
-                                        <td className="px-6 py-4 text-slate-600">
+                                        <p className="mt-1 break-words text-sm font-medium text-slate-700">
                                             {ticket.department_name || "Not assigned"}
-                                        </td>
+                                        </p>
+                                    </div>
 
-                                        <td className="px-6 py-4">
-                                            <span
-                                                className={`rounded-full px-3 py-1 text-xs font-semibold ${getPriorityStyle(
-                                                    ticket.priority
-                                                )}`}
-                                            >
-                                                {ticket.priority}
-                                            </span>
-                                        </td>
+                                    <div>
+                                        <p className="text-xs text-slate-400">
+                                            Assigned To
+                                        </p>
 
-                                        <td className="px-6 py-4">
-                                            <span
-                                                className={`rounded-full px-3 py-1 text-xs font-semibold ${getStatusStyle(
-                                                    ticket.status
-                                                )}`}
-                                            >
-                                                {ticket.status?.replace("_", " ")}
-                                            </span>
-                                        </td>
-
-                                        <td className="px-6 py-4 text-slate-600">
+                                        <p className="mt-1 break-words text-sm font-medium text-slate-700">
                                             {ticket.assigned_to_username || "Unassigned"}
-                                        </td>
+                                        </p>
+                                    </div>
+                                </div>
 
-                                        <td className="px-6 py-4">
-                                            <button
-                                                onClick={() => navigate(`/tickets/${ticket.id}`)}
-                                                className="flex items-center gap-2 rounded-lg bg-slate-100 px-3 py-2 text-slate-700 transition hover:bg-blue-100 hover:text-blue-700"
-                                            >
-                                                <FiEye />
-                                                View
-                                            </button>
-                                        </td>
+                                <div className="mt-4 flex items-center justify-between gap-3">
+                                    <span
+                                        className={`rounded-full px-3 py-1 text-xs font-semibold ${getPriorityStyle(
+                                            ticket.priority
+                                        )}`}
+                                    >
+                                        {ticket.priority} Priority
+                                    </span>
+
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            navigate(`/tickets/${ticket.id}`)
+                                        }
+                                        className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
+                                    >
+                                        <FiEye />
+                                        View
+                                    </button>
+                                </div>
+                            </article>
+                        ))}
+                    </div>
+
+                    {/* Tablet and desktop table */}
+                    <div className="hidden overflow-hidden rounded-2xl bg-white shadow-sm md:block">
+                        <div className="overflow-x-auto">
+                            <table className="min-w-[950px] w-full">
+                                <thead className="bg-slate-50">
+                                    <tr className="text-left text-sm text-slate-500">
+                                        <th className="px-6 py-4">ID</th>
+                                        <th className="px-6 py-4">Title</th>
+                                        <th className="px-6 py-4">Department</th>
+                                        <th className="px-6 py-4">Priority</th>
+                                        <th className="px-6 py-4">Status</th>
+                                        <th className="px-6 py-4">Assigned To</th>
+                                        <th className="px-6 py-4">Action</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                        <div className="flex flex-col gap-3 border-t border-slate-200 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
-                            <p className="text-sm text-slate-500">
-                                Page {currentPage} · {totalTickets} total tickets
-                            </p>
+                                </thead>
 
-                            <div className="flex gap-2">
-                                <button
-                                    type="button"
-                                    onClick={() =>
-                                        setCurrentPage((page) => Math.max(page - 1, 1))
-                                    }
-                                    disabled={!previousPage || loading}
-                                    className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
-                                >
-                                    Previous
-                                </button>
+                                <tbody className="divide-y divide-slate-100">
+                                    {tickets.map((ticket) => (
+                                        <tr
+                                            key={ticket.id}
+                                            className="text-sm transition hover:bg-slate-50"
+                                        >
+                                            <td className="whitespace-nowrap px-6 py-4 font-medium text-slate-700">
+                                                #{ticket.id}
+                                            </td>
 
-                                <button
-                                    type="button"
-                                    onClick={() =>
-                                        setCurrentPage((page) => page + 1)
-                                    }
-                                    disabled={!nextPage || loading}
-                                    className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-                                >
-                                    Next
-                                </button>
-                            </div>
+                                            <td className="px-6 py-4">
+                                                <p className="max-w-xs font-semibold text-slate-800">
+                                                    {ticket.title}
+                                                </p>
+
+                                                <p className="mt-1 max-w-xs truncate text-xs text-slate-500">
+                                                    {ticket.description}
+                                                </p>
+                                            </td>
+
+                                            <td className="px-6 py-4 text-slate-600">
+                                                {ticket.department_name || "Not assigned"}
+                                            </td>
+
+                                            <td className="px-6 py-4">
+                                                <span
+                                                    className={`whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold ${getPriorityStyle(
+                                                        ticket.priority
+                                                    )}`}
+                                                >
+                                                    {ticket.priority}
+                                                </span>
+                                            </td>
+
+                                            <td className="px-6 py-4">
+                                                <span
+                                                    className={`whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold ${getStatusStyle(
+                                                        ticket.status
+                                                    )}`}
+                                                >
+                                                    {ticket.status?.replaceAll("_", " ")}
+                                                </span>
+                                            </td>
+
+                                            <td className="px-6 py-4 text-slate-600">
+                                                {ticket.assigned_to_username || "Unassigned"}
+                                            </td>
+
+                                            <td className="px-6 py-4">
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        navigate(`/tickets/${ticket.id}`)
+                                                    }
+                                                    className="flex items-center gap-2 rounded-lg bg-slate-100 px-3 py-2 text-slate-700 transition hover:bg-blue-100 hover:text-blue-700"
+                                                >
+                                                    <FiEye />
+                                                    View
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
-                )}
-            </div>
+
+                    {/* Pagination */}
+                    <div className="flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+                        <p className="text-center text-sm text-slate-500 sm:text-left">
+                            Page {currentPage} · {totalTickets} total ticket
+                            {totalTickets === 1 ? "" : "s"}
+                        </p>
+
+                        <div className="grid grid-cols-2 gap-2 sm:flex">
+                            <button
+                                type="button"
+                                onClick={() =>
+                                    setCurrentPage((page) =>
+                                        Math.max(page - 1, 1)
+                                    )
+                                }
+                                disabled={!previousPage || loading}
+                                className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                Previous
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() =>
+                                    setCurrentPage((page) => page + 1)
+                                }
+                                disabled={!nextPage || loading}
+                                className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                Next
+                            </button>
+                        </div>
+                    </div>
+                </>
+            )}
             <CreateTicketModal
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
