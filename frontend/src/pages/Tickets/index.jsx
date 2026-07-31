@@ -48,14 +48,36 @@ function Tickets() {
     };
 
     const fetchDepartments = async () => {
-        try {
-            const response = await api.get("/helpdesk/departments/");
-            const data = response.data.results || response.data;
-            setDepartments(data);
-        } catch (error) {
-            console.error("Departments fetch error:", error);
+    try {
+        let allDepartments = [];
+        let nextUrl = "/helpdesk/departments/";
+
+        while (nextUrl) {
+            const response = await api.get(nextUrl);
+
+            const pageDepartments =
+                response.data.results || response.data;
+
+            allDepartments = [
+                ...allDepartments,
+                ...pageDepartments,
+            ];
+
+            if (response.data.next) {
+                nextUrl = response.data.next.replace(
+                    "https://smart-campus-helpdesk-backend.onrender.com/api",
+                    ""
+                );
+            } else {
+                nextUrl = null;
+            }
         }
-    };
+
+        setDepartments(allDepartments);
+    } catch (error) {
+        console.error("Departments fetch error:", error);
+    }
+};
     useEffect(() => {
         fetchDepartments();
     }, []);
