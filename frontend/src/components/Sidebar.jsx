@@ -11,11 +11,12 @@ import {
     FiLogOut,
     FiUser,
     FiUsers,
+    FiX,
 } from "react-icons/fi";
 
 import api from "../api/axios";
 
-function Sidebar() {
+function Sidebar({ isOpen, onClose }) {
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -25,7 +26,9 @@ function Sidebar() {
         try {
             const storedUser = localStorage.getItem("user");
 
-            return storedUser ? JSON.parse(storedUser) : null;
+            return storedUser
+                ? JSON.parse(storedUser)
+                : null;
         } catch {
             return null;
         }
@@ -35,7 +38,9 @@ function Sidebar() {
         ? currentUser.role
               .toLowerCase()
               .replaceAll("_", " ")
-              .replace(/\b\w/g, (letter) => letter.toUpperCase())
+              .replace(/\b\w/g, (letter) =>
+                  letter.toUpperCase()
+              )
         : "";
 
     const displayName =
@@ -92,10 +97,14 @@ function Sidebar() {
                 "/helpdesk/notifications/unread-count/"
             );
 
-            const count = Number(response.data?.unread_count);
+            const count = Number(
+                response.data?.unread_count
+            );
 
             setUnreadCount(
-                Number.isFinite(count) && count > 0 ? count : 0
+                Number.isFinite(count) && count > 0
+                    ? count
+                    : 0
             );
         } catch (error) {
             setUnreadCount(0);
@@ -111,6 +120,12 @@ function Sidebar() {
         fetchUnreadCount();
     }, [fetchUnreadCount, location.pathname]);
 
+    useEffect(() => {
+        if (onClose) {
+            onClose();
+        }
+    }, [location.pathname]);
+
     const handleLogout = () => {
         localStorage.removeItem("access");
         localStorage.removeItem("refresh");
@@ -122,15 +137,34 @@ function Sidebar() {
     };
 
     return (
-        <aside className="flex min-h-screen w-64 flex-shrink-0 flex-col bg-slate-950 text-white">
-            <div className="border-b border-slate-800 px-6 py-6">
-                <p className="text-xs font-semibold uppercase tracking-[0.25em] text-blue-400">
-                    Smart Campus
-                </p>
+        <aside
+            className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-shrink-0 flex-col bg-slate-950 text-white shadow-2xl transition-transform duration-300 ease-in-out lg:static lg:w-64 lg:translate-x-0 lg:shadow-none ${
+                isOpen
+                    ? "translate-x-0"
+                    : "-translate-x-full"
+            }`}
+        >
+            <div className="border-b border-slate-800 px-5 py-5 sm:px-6">
+                <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                        <p className="text-xs font-semibold uppercase tracking-[0.25em] text-blue-400">
+                            Smart Campus
+                        </p>
 
-                <h1 className="mt-2 text-xl font-bold">
-                    Helpdesk System
-                </h1>
+                        <h1 className="mt-2 text-lg font-bold sm:text-xl">
+                            Helpdesk System
+                        </h1>
+                    </div>
+
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        aria-label="Close sidebar"
+                        className="rounded-lg p-2 text-slate-300 transition hover:bg-slate-800 hover:text-white lg:hidden"
+                    >
+                        <FiX className="text-xl" />
+                    </button>
+                </div>
 
                 {currentUser && (
                     <div className="mt-4 rounded-xl border border-slate-800 bg-slate-900 px-3 py-3">
@@ -145,7 +179,7 @@ function Sidebar() {
                 )}
             </div>
 
-            <nav className="flex-1 space-y-2 overflow-y-auto px-4 py-6">
+            <nav className="flex-1 space-y-2 overflow-y-auto px-4 py-5">
                 {menuItems.map((item) => {
                     const Icon = item.icon;
 
@@ -154,6 +188,7 @@ function Sidebar() {
                             key={item.name}
                             to={item.path}
                             end={item.end}
+                            onClick={onClose}
                             className={({ isActive }) =>
                                 `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition ${
                                     isActive
