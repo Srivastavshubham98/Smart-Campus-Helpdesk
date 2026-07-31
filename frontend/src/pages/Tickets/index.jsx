@@ -15,6 +15,7 @@ function Tickets() {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [department, setDepartment] = useState("");
     const [departments, setDepartments] = useState([]);
+    const [departmentsLoading, setDepartmentsLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalTickets, setTotalTickets] = useState(0);
     const [nextPage, setNextPage] = useState(null);
@@ -49,6 +50,8 @@ function Tickets() {
 
     const fetchDepartments = async () => {
     try {
+        setDepartmentsLoading(true);
+
         let allDepartments = [];
         let nextUrl = "/helpdesk/departments/";
 
@@ -76,6 +79,8 @@ function Tickets() {
         setDepartments(allDepartments);
     } catch (error) {
         console.error("Departments fetch error:", error);
+    } finally {
+        setDepartmentsLoading(false);
     }
 };
     useEffect(() => {
@@ -196,21 +201,28 @@ function Tickets() {
                         <option value="LOW">Low</option>
                     </select>
                     <select
-                        value={department}
-                        onChange={(event) => {
-                            setDepartment(event.target.value);
-                            setCurrentPage(1);
-                        }}
-                        className="rounded-xl border border-slate-200 px-4 py-3 outline-none transition focus:border-blue-500"
-                    >
-                        <option value="">All Departments</option>
+    value={department}
+    onChange={(event) => {
+        setDepartment(event.target.value);
+        setCurrentPage(1);
+    }}
+    disabled={departmentsLoading}
+    className="rounded-xl border border-slate-200 px-4 py-3 outline-none transition focus:border-blue-500 disabled:cursor-not-allowed disabled:bg-slate-100"
+>
+    {departmentsLoading ? (
+        <option value="">Loading departments...</option>
+    ) : (
+        <>
+            <option value="">All Departments</option>
 
-                        {departments.map((item) => (
-                            <option key={item.id} value={item.id}>
-                                {item.name}
-                            </option>
-                        ))}
-                    </select>
+            {departments.map((item) => (
+                <option key={item.id} value={item.id}>
+                    {item.name}
+                </option>
+            ))}
+        </>
+    )}
+</select>
                     <button
                         type="button"
                         onClick={() => {
