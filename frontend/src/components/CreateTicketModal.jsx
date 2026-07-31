@@ -20,19 +20,42 @@ function CreateTicketModal({
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!isOpen) return;
+  if (!isOpen) return;
 
-    const fetchDepartments = async () => {
-      try {
-        const response = await api.get("/helpdesk/departments/");
-        setDepartments(response.data.results || response.data);
-      } catch (error) {
-        console.error(error);
+  const fetchDepartments = async () => {
+    try {
+      let allDepartments = [];
+      let nextUrl = "/helpdesk/departments/";
+
+      while (nextUrl) {
+        const response = await api.get(nextUrl);
+
+        allDepartments = [
+          ...allDepartments,
+          ...(response.data.results || []),
+        ];
+
+        if (response.data.next) {
+          // Full URL ko relative URL me convert karna
+          nextUrl = response.data.next.replace(
+            "https://smart-campus-helpdesk-backend.onrender.com/api",
+            ""
+          );
+        } else {
+          nextUrl = null;
+        }
       }
-    };
 
-    fetchDepartments();
-  }, [isOpen]);
+      console.log("All Departments:", allDepartments);
+      setDepartments(allDepartments);
+    } catch (error) {
+      console.error("Failed to fetch departments:", error);
+      toast.error("Unable to load departments.");
+    }
+  };
+
+  fetchDepartments();
+}, [isOpen]);
 
   const handleCreateTicket = async () => {
     try {
